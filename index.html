@@ -40,14 +40,10 @@
         }
 
         body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            content: ""; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
                         linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            z-index: 100;
+            background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 100;
         }
 
         .scanline {
@@ -57,16 +53,12 @@
             transition: background 1s, box-shadow 1s;
         }
 
-        @keyframes scan {
-            0% { transform: translateY(-100px); }
-            100% { transform: translateY(100vh); }
-        }
+        @keyframes scan { 0% { transform: translateY(-100px); } 100% { transform: translateY(100vh); } }
 
         .crt-frame {
             position: absolute; top: 3vh; left: 3vw; width: 94vw; height: 94vh;
             border: 2px solid var(--theme-main); box-shadow: inset 0 0 15px var(--theme-dim), 0 0 15px var(--theme-dim);
-            pointer-events: none; z-index: 50; padding: 20px; box-sizing: border-box;
-            transition: border-color 1s, box-shadow 1s;
+            pointer-events: none; z-index: 50; padding: 20px; box-sizing: border-box; transition: border-color 1s, box-shadow 1s;
         }
 
         .crt-frame::before {
@@ -75,15 +67,13 @@
         }
 
         .frame-top-bar {
-            position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%);
-            background-color: var(--crt-bg); padding: 0 15px; font-size: 0.8rem;
-            letter-spacing: 2px; border: 1px solid var(--theme-main); transition: border-color 1s;
+            position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); background-color: var(--crt-bg);
+            padding: 0 15px; font-size: 0.8rem; letter-spacing: 2px; border: 1px solid var(--theme-main); transition: border-color 1s;
         }
 
         .frame-info-left, .frame-info-right, .frame-bottom-bar {
             position: absolute; font-size: 0.6rem; line-height: 1.2; opacity: 0.8; background-color: var(--crt-bg);
         }
-
         .frame-info-left { top: 20px; left: 10px; text-align: left; }
         .frame-info-right { top: 20px; right: 10px; text-align: right; }
         .frame-bottom-bar { bottom: -8px; right: 20px; padding: 0 10px; letter-spacing: 1px; }
@@ -124,6 +114,15 @@
 
         #start-screen { display: flex; }
         #game-screen { justify-content: flex-start; padding-top: 60px; }
+        
+        /* Estilos do Boot Screen */
+        #boot-screen {
+            justify-content: flex-start; align-items: flex-start; text-align: left;
+            font-family: 'Courier New', Courier, monospace; color: #00ff00;
+            padding: 40px; text-shadow: none; z-index: 60; background-color: #000;
+        }
+
+        #lore-screen { z-index: 60; background-color: #000; }
 
         h1.title { font-size: clamp(3rem, 10vw, 5rem); margin: 0; letter-spacing: 5px; }
         .blinker { animation: blink 1s step-end infinite; }
@@ -167,7 +166,6 @@
         .flip { animation: flipHex 0.6s ease-in-out forwards; }
         @keyframes flipHex { 0% { transform: rotateX(0deg); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0deg); } }
 
-        /* Cores Fixas (Feedback) */
         .tile.green { background-color: var(--feed-green) !important; color: #000 !important; text-shadow: none !important; }
         .tile.yellow { background-color: var(--feed-yellow) !important; color: #000 !important; text-shadow: none !important; }
         .tile.black { background-color: var(--feed-black) !important; color: #666 !important; text-shadow: none !important; }
@@ -182,7 +180,6 @@
         }
         button.key.large { flex: 1.5; font-size: clamp(0.7rem, 2.5vw, 0.9rem); }
         button.key:active { transform: scale(0.95); transition: none; }
-        
         button.key.green { background-color: var(--feed-green) !important; color: #000 !important; border-color: var(--feed-green) !important; box-shadow: none !important; }
         button.key.yellow { background-color: var(--feed-yellow) !important; color: #000 !important; border-color: var(--feed-yellow) !important; box-shadow: none !important; }
         button.key.black { background-color: var(--feed-black) !important; color: #666 !important; border-color: #333 !important; box-shadow: none !important; }
@@ -214,18 +211,22 @@
     <div id="start-screen" class="screen">
         <h1 class="title">HACK!</h1>
         <div style="font-size: 1.2rem; margin-top: 10px;">> SYSTEM INFILTRATION<span class="blinker">_</span></div>
-        <button class="btn" onclick="iniciarModoHistoria()">Invasão (10 Níveis)</button>
-        <button class="btn" onclick="iniciarModoInfinito()">Modo Infinito</button>
+        <button class="btn" onclick="entrarEmTelaCheia(); iniciarSecaoBoot();">Invasão (10 Níveis)</button>
+        <button class="btn" onclick="entrarEmTelaCheia(); iniciarModoInfinito();">Modo Infinito</button>
         <button class="btn" onclick="mudarTela('tutorial-screen')">Tutorial</button>
         <div class="dev-footer">DEV wgrmoreira</div>
     </div>
 
+    <div id="boot-screen" class="screen"></div>
+
+    <div id="lore-screen" class="screen"></div>
+
     <div id="tutorial-screen" class="screen">
         <h2>> MANUAL DE INVASÃO</h2>
-        <p>- Decifre a senha em 6 tentativas.</p>
+        <p>- Decifre a senha em 6 tentativas. Menos tentativas rendem MAIS pontos.</p>
         <p>- Letra <b>VERDE</b>: Correta e no lugar certo. (Ela será mantida automaticamente).</p>
         <p>- Letra <b>AMARELA</b>: Correta, mas no lugar errado.</p>
-        <p>- O Sistema Principal tem 10 Níveis de segurança (5, 6 e 7 letras). O Modo Infinito é eterno.</p>
+        <p>- O Sistema Principal guarda a verdade sobre a COVID19 em 10 Níveis (5, 6 e 7 letras).</p>
         <p style="color:var(--danger-red); text-shadow:0 0 5px red;">- ERRO É FATAL. Falhar uma palavra resulta em rastreio imediato e Game Over.</p>
         <button class="btn" onclick="mudarTela('start-screen')">Voltar</button>
     </div>
@@ -297,13 +298,10 @@
         const glitchOverlay = document.getElementById('glitch-overlay');
 
         function triggerGlitch() {
-            const span = document.createElement('span');
-            span.className = 'glitch-char';
+            const span = document.createElement('span'); span.className = 'glitch-char';
             span.textContent = glitchChars[Math.floor(Math.random() * glitchChars.length)];
-            span.style.left = Math.random() * 95 + 'vw';
-            span.style.top = Math.random() * 95 + 'vh';
+            span.style.left = Math.random() * 95 + 'vw'; span.style.top = Math.random() * 95 + 'vh';
             span.style.fontSize = (Math.random() * 3 + 1) + 'rem';
-            
             glitchOverlay.appendChild(span);
             setTimeout(() => span.remove(), 150);
             setTimeout(triggerGlitch, Math.random() * 3000 + 1500);
@@ -319,7 +317,6 @@
         let palavraAlvo = "";
         let palavraIndex = 0;
         let scoreTotal = 0;
-        let tempoInicioWord = 0;
         let wordLength = 5;
         let linhaAtual = 0;
         let isProcessing = false;
@@ -340,8 +337,7 @@
 
         function tocarSom(frequencia, tipo, duracao, volume = 0.1) {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.type = tipo; osc.frequency.setValueAtTime(frequencia, audioCtx.currentTime);
             osc.connect(gain); gain.connect(audioCtx.destination); osc.start();
             gain.gain.setValueAtTime(volume, audioCtx.currentTime);
@@ -350,7 +346,7 @@
         }
 
         const sons = {
-            clickGeral: () => tocarSom(1000, 'sine', 0.05, 0.02),
+            clickGeral: () => tocarSom(900, 'sine', 0.05, 0.02),
             digitar: () => tocarSom(800, 'square', 0.05, 0.05),
             apagar: () => tocarSom(300, 'sawtooth', 0.1, 0.05),
             enter: () => tocarSom(1200, 'square', 0.1, 0.1),
@@ -379,6 +375,159 @@
             return array;
         }
 
+        // --- SEQUÊNCIA DE BOOT COM SELEÇÃO DE PASTA ---
+        function iniciarSecaoBoot() {
+            initAudio();
+            mudarTela('boot-screen');
+            const bootScreen = document.getElementById('boot-screen');
+            
+            // Garantir que a tela inicie alinhada ao topo/esquerda
+            bootScreen.style.justifyContent = "flex-start";
+            bootScreen.style.alignItems = "flex-start";
+            bootScreen.innerHTML = '';
+            
+            const linhas = [
+                "Award Modular BIOS v4.51PG, An Energy Star Ally",
+                "Copyright (C) 1984-98, Award Software, Inc.",
+                "<br>",
+                "ASUS P2B ACPI BIOS Revision 1014 Beta 003",
+                "Pentium II-ECC 233MHz Processor",
+                "Memory Test : 262144K OK",
+                "<br>",
+                "PNP Init Completed",
+                "Mounting drive C: ... OK",
+                "Loading OS Interface..."
+            ];
+
+            let delay = 0;
+            linhas.forEach((linha) => {
+                setTimeout(() => {
+                    bootScreen.innerHTML += linha + (linha === "<br>" ? "" : "<br>");
+                    if (linha !== "<br>") sons.clickGeral();
+                }, delay);
+                delay += (Math.random() * 300) + 150;
+            });
+
+            // Fase 2: Simulação de sistema de arquivos
+            setTimeout(() => {
+                bootScreen.innerHTML = "";
+                bootScreen.style.justifyContent = "center";
+                bootScreen.style.alignItems = "center";
+                
+                bootScreen.innerHTML = `
+                    <div style="width: 100%; max-width: 500px; text-align: left; font-size: 1.1rem;">
+                        <div style="border-bottom: 1px solid var(--theme-main); margin-bottom: 15px; padding-bottom: 5px;">
+                            C:\\CLASSIFIED\\ARCHIVES\\
+                        </div>
+                        <div style="color: var(--theme-dim); padding-left: 10px; line-height: 1.8;">
+                            <div>[DIR] PROJECT_CHIMERA</div>
+                            <div id="target-folder" style="transition: all 0.3s;">[DIR] Truth_Virus_COV19</div>
+                            <div>[FILE] SUBJECTS_LIST.DAT</div>
+                            <div>[FILE] VACCINE_TRIAL_V2.LOG</div>
+                        </div>
+                        <div id="cursor-action" style="margin-top: 30px; color: var(--theme-main); opacity: 0; font-weight: bold;"></div>
+                    </div>
+                `;
+                sons.digitar();
+
+                // Simulação do cursor "clicando" na pasta
+                setTimeout(() => {
+                    const target = document.getElementById("target-folder");
+                    const cursorAction = document.getElementById("cursor-action");
+                    
+                    cursorAction.style.opacity = 1;
+                    cursorAction.innerText = "> Selecting target...";
+                    sons.clickGeral();
+
+                    setTimeout(() => {
+                        target.style.backgroundColor = "var(--theme-main)";
+                        target.style.color = "#000";
+                        target.style.padding = "0 5px";
+                        cursorAction.innerText = "> Executing open command...";
+                        sons.enter();
+
+                        // Fase 3: Erro de Criptografia e Botão
+                        setTimeout(() => {
+                            sons.falhaCritica();
+                            bootScreen.innerHTML += `
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                            background-color: #000; border: 2px solid red; padding: 25px 20px; text-align: center;
+                                            box-shadow: 0 0 25px red; width: 85%; max-width: 450px; z-index: 100;">
+                                    <h2 style="color: red; margin-top: 0; text-shadow: 0 0 10px red; letter-spacing: 2px;">ACESSO NEGADO</h2>
+                                    <p style="color: #fff; font-size: 1.1rem; margin-bottom: 15px;">
+                                        O diretório <b>Truth_Virus_COV19</b> está selado.
+                                    </p>
+                                    <p style="color: var(--theme-dim); font-size: 0.95rem; line-height: 1.4;">
+                                        > Criptografia de Nível 10 Detectada.<br>
+                                        > Necessário quebrar 10 chaves de segurança textuais para descriptografar os dados.
+                                    </p>
+                                    <button class="btn btn-danger" style="margin-top: 25px; width: 100%; border-color: red; color: red;" 
+                                            onclick="iniciarModoHistoria()">Continuar e Iniciar Hack</button>
+                                </div>
+                            `;
+                        }, 1200);
+
+                    }, 1000);
+
+                }, 1500);
+
+            }, delay + 500);
+        }
+
+        function iniciarLoreFinal() {
+            mudarTela('lore-screen');
+            const loreScreen = document.getElementById('lore-screen');
+            loreScreen.innerHTML = `
+                <div style="text-align: left; width: 90%; max-width: 600px; font-family: monospace;">
+                    <div style="color:#00ff00;">> Opening folder: Truth_Virus_COV19... OK</div>
+                    <div style="color:#00ff00;">> Extracting confidential files...</div>
+                    <div id="lore-list" style="margin-top:20px; font-size: 0.9rem; color: var(--theme-dim); height: 180px; overflow: hidden; border-left: 2px solid var(--theme-dim); padding-left: 10px;"></div>
+                    <div id="lore-revelation" style="display:none; color: var(--danger-red); font-size: clamp(1.5rem, 5vw, 2.5rem); margin: 30px 0; text-align: center; text-shadow: 0 0 15px red; font-weight: bold; font-family: 'Share Tech Mono', monospace;">DESENVOLVIMENTO ARTIFICIAL</div>
+                    <div id="lore-progress" style="display:none; text-align: center; color: #00ff00; margin-top: 20px;">COPIANDO DADOS... [0%]</div>
+                </div>
+            `;
+            
+            const names = ["BioTech Global", "Dr. A. Vance", "Umbrella Corp - Divisão Latam", "Project Chimera V2", "Wuhan Institute of Virology", "EcoHealth Alliance", "DARPA Init / Bio-Warfare", "Genome Sequencer X", "Patient Zero Protocol - Activo", "Synthetic RNA strain - Sucesso", "Vector integration complete"];
+            const listDiv = document.getElementById('lore-list');
+            let nameIdx = 0;
+            
+            let scrollInterval = setInterval(() => {
+                listDiv.innerHTML += names[nameIdx % names.length] + " ... DECRYPTED<br>";
+                listDiv.scrollTop = listDiv.scrollHeight;
+                nameIdx++;
+                sons.clickGeral();
+            }, 150);
+            
+            setTimeout(() => {
+                clearInterval(scrollInterval);
+                document.getElementById('lore-revelation').style.display = 'block';
+                sons.falhaCritica();
+            }, 3000);
+            
+            setTimeout(() => {
+                document.getElementById('lore-progress').style.display = 'block';
+                let progress = 0;
+                let copyInterval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 8) + 2;
+                    if(progress > 100) progress = 100;
+                    
+                    let bars = Math.floor(progress / 5);
+                    document.getElementById('lore-progress').innerText = `COPIANDO DADOS... [${"█".repeat(bars)}${"▒".repeat(20-bars)}] ${progress}%`;
+                    sons.digitar();
+                    
+                    if(progress >= 100) {
+                        clearInterval(copyInterval);
+                        setTimeout(() => {
+                            document.getElementById("win-score").textContent = "SCORE FINAL: " + scoreTotal;
+                            mudarTela('victory-screen');
+                            sons.vitoriaPalavra();
+                        }, 1500);
+                    }
+                }, 200);
+            }, 5500);
+        }
+
+        // --- SISTEMA E TEMAS ---
         function atualizarTemaDinamico() {
             const root = document.documentElement;
             let stage = 1;
@@ -388,9 +537,9 @@
                 else if (wordLength === 6) stage = 2;
                 else stage = 3;
             } else {
-                if (palavraIndex < 3) stage = 1;      // 0, 1, 2 = Verde
-                else if (palavraIndex < 6) stage = 2; // 3, 4, 5 = Branco
-                else stage = 3;                       // 6, 7, 8, 9 = Amarelo
+                if (palavraIndex < 3) stage = 1;
+                else if (palavraIndex < 6) stage = 2;
+                else stage = 3;
             }
 
             if (stage === 1) { // VERDE
@@ -408,31 +557,30 @@
             }
         }
 
-        // --- INICIALIZAÇÃO DE MODOS ---
-
         function iniciarModoHistoria() {
+            // Reseta formatação da tela de boot para próxima jogada
+            const bootScreen = document.getElementById('boot-screen');
+            bootScreen.style.justifyContent = "flex-start";
+            bootScreen.style.alignItems = "flex-start";
+
             isInfiniteMode = false;
             let mix5 = shuffle([...palavras5]).slice(0, 3);
             let mix6 = shuffle([...palavras6]).slice(0, 3);
             let mix7 = shuffle([...palavras7]).slice(0, 4);
-            rotinaPalavras = mix5.concat(mix6).concat(mix7); // 10 Fases
+            rotinaPalavras = mix5.concat(mix6).concat(mix7);
             
-            palavraIndex = 0;
-            scoreTotal = 0;
+            palavraIndex = 0; scoreTotal = 0;
             document.getElementById("score-display").textContent = "0000";
             
             mudarTela('game-screen');
-            entrarEmTelaCheia();
             carregarProximaPalavra();
         }
 
         function iniciarModoInfinito() {
-            isInfiniteMode = true;
-            infiniteWordsSolved = 0;
+            isInfiniteMode = true; infiniteWordsSolved = 0;
             document.getElementById("score-display").textContent = "INF";
             
             mudarTela('game-screen');
-            entrarEmTelaCheia();
             carregarProximaPalavra();
         }
 
@@ -456,8 +604,7 @@
 
         function carregarProximaPalavra() {
             if (!isInfiniteMode && palavraIndex >= 10) {
-                document.getElementById("win-score").textContent = "SCORE FINAL: " + scoreTotal;
-                mudarTela('victory-screen');
+                iniciarLoreFinal();
                 return;
             }
 
@@ -472,10 +619,8 @@
             }
 
             wordLength = palavraAlvo.length;
-            linhaAtual = 0;
-            isProcessing = false;
+            linhaAtual = 0; isProcessing = false;
             letrasVerdesBloqueadas = Array(wordLength).fill("");
-            tempoInicioWord = Date.now();
 
             atualizarTemaDinamico();
             atualizarEvolucao();
@@ -543,7 +688,7 @@
             }
 
             setTimeout(() => {
-                // VITÓRIA
+                // VITÓRIA DA PALAVRA
                 if (chute === palavraAlvo) {
                     sons.vitoriaPalavra();
                     if (!isInfiniteMode) {
@@ -580,9 +725,9 @@
         }
 
         function calcularPontuacao() {
-            let tempoGasto = (Date.now() - tempoInicioWord) / 1000;
-            let pontosBase = wordLength * 200;
-            let pontosDestaPalavra = Math.max(50, Math.floor(pontosBase - (tempoGasto * 15)));
+            let multiplicador = 6 - linhaAtual; 
+            let pontosDestaPalavra = wordLength * 50 * multiplicador; 
+            
             scoreTotal += pontosDestaPalavra;
             document.getElementById("score-display").textContent = scoreTotal.toString().padStart(4, '0');
         }
