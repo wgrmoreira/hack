@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HACK! - Terminal Infiltration</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --crt-bg: #050a05;
+            --neon-green: #00ff00;
+            --dark-green: #003300;
+            --dim-green: #008800;
+            --neon-yellow: #ffcc00;
+            --dark-gray: #111111;
+            --text-glow: 0 0 5px var(--neon-green), 0 0 10px var(--dim-green);
+            --danger-red: #ff0000;
+        }
+
+        body {
+            background-color: var(--crt-bg);
+            color: var(--neon-green);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-shadow: var(--text-glow);
+            user-select: none;
+        }
+
+        /* Efeito Monitor CRT Geral */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 15px;
+            background: rgba(0, 255, 0, 0.15);
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 101;
+            pointer-events: none;
+            animation: scan 6s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* --- MOLDURA HACKER --- */
+        .crt-frame {
+            position: absolute;
+            top: 3vh; left: 3vw;
+            width: 94vw; height: 94vh;
+            border: 2px solid var(--neon-green);
+            box-shadow: inset 0 0 15px var(--dim-green), 0 0 15px var(--dim-green);
+            pointer-events: none;
+            z-index: 50;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .crt-frame::before {
+            content: "";
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px dashed var(--dim-green);
+            opacity: 0.5;
+        }
+
+        .frame-top-bar {
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--crt-bg);
+            padding: 0 15px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border: 1px solid var(--neon-green);
+        }
+
+        .frame-info-left, .frame-info-right, .frame-bottom-bar {
+            position: absolute;
+            font-size: 0.6rem;
+            line-height: 1.2;
+            opacity: 0.8;
+            background-color: var(--crt-bg);
+        }
+
+        .frame-info-left { top: 20px; left: 10px; text-align: left; }
+        .frame-info-right { top: 20px; right: 10px; text-align: right; }
+        .frame-bottom-bar { 
+            bottom: -8px; right: 20px; 
+            padding: 0 10px;
+            letter-spacing: 1px;
+        }
+
+        /* Status para Mobile (Abaixo do teclado) */
+        .mobile-stats {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            font-size: 0.65rem;
+            color: var(--dim-green);
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.4;
+            opacity: 0.8;
+        }
+
+        /* Layout Responsivo para Ocultar Borda Lateral e Exibir Mobile Stats */
+        @media (max-width: 600px) {
+            .frame-info-left, .frame-info-right, .frame-bottom-bar { display: none; }
+            .mobile-stats { display: block; }
+        }
+
+        /* --- GLITCH SYSTEM --- */
+        #glitch-overlay {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; overflow: hidden; z-index: 90;
+        }
+
+        .glitch-char {
+            position: absolute;
+            color: var(--neon-green);
+            font-weight: bold;
+            opacity: 0;
+            animation: glitch-flash 0.15s linear;
+        }
+
+        @keyframes glitch-flash {
+            0% { opacity: 0; transform: scale(1) translate(0,0); }
+            30% { opacity: 0.9; transform: scale(1.2) translate(2px, -2px); text-shadow: 0 0 15px #fff; }
+            70% { opacity: 0.5; transform: scale(0.9) translate(-2px, 2px); }
+            100% { opacity: 0; transform: scale(1); }
+        }
+
+        /* Telas */
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 10;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            pointer-events: auto;
+        }
+
+        #start-screen { display: flex; }
+        #game-screen { justify-content: flex-start; padding-top: 60px; }
+
+        /* Textos e Botões */
+        h1.title {
+            font-size: clamp(3rem, 10vw, 5rem);
+            margin: 0;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px var(--neon-green);
+        }
+
+        .blinker { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .btn {
+            background-color: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            margin-top: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--neon-green) inset, 0 0 10px var(--neon-green);
+            text-shadow: inherit;
+            transition: all 0.2s;
+            width: 80%;
+            max-width: 300px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .btn:active { background-color: var(--neon-green); color: #000; text-shadow: none; }
+        .btn-danger {
+            color: var(--danger-red); border-color: var(--danger-red);
+            box-shadow: 0 0 10px var(--danger-red) inset, 0 0 10px var(--danger-red);
+            text-shadow: 0 0 5px var(--danger-red);
+        }
+        .btn-danger:active { background-color: var(--danger-red); color: #000; }
+
+        .dev-footer {
+            position: absolute;
+            bottom: 15px;
+            font-size: 0.8rem;
+            opacity: 0.4;
+            letter-spacing: 2px;
+        }
+
+        /* Interface do Jogo */
+        #hud {
+            width: 100%;
+            max-width: 500px;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            border-bottom: 1px solid var(--dim-green);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .hud-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        #progress-bar { font-size: clamp(0.7rem, 2.5vw, 1rem); color: var(--dim-green); letter-spacing: 1px;}
+
+        #board {
+            display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;
+            perspective: 1000px; width: 100%; align-items: center;
+        }
+
+        .row { display: flex; justify-content: center; gap: 4px; }
+
+        .tile {
+            width: clamp(35px, 8vw, 50px); height: clamp(40px, 9vw, 56px);
+            background-color: var(--dark-green);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            display: flex; justify-content: center; align-items: center;
+            font-size: clamp(1.2rem, 4vw, 1.8rem); font-weight: bold;
+            color: var(--neon-green); text-transform: uppercase; transform-style: preserve-3d;
+        }
+
+        .tile.filled { background-color: var(--dim-green); color: #fff; text-shadow: none; }
+        .flip { animation: flipHex 0.6s ease-in-out forwards; }
+        @keyframes flipHex { 0% { transform: rotateX(0deg); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0deg); } }
+
+        .tile.green { background-color: var(--neon-green); color: #000; text-shadow: none; }
+        .tile.yellow { background-color: var(--neon-yellow); color: #000; text-shadow: none; }
+        .tile.black { background-color: var(--dark-gray); color: var(--dim-green); text-shadow: none; }
+
+        /* Teclado Virtual */
+        #keyboard { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 500px; position: relative; z-index: 20;}
+        .key-row { display: flex; justify-content: center; gap: clamp(3px, 1vw, 5px); }
+        button.key {
+            background-color: var(--dark-green); color: var(--neon-green); border: 1px solid var(--dim-green); border-radius: 2px;
+            height: clamp(40px, 10vw, 45px); font-size: clamp(0.9rem, 3vw, 1.1rem); font-family: inherit; cursor: pointer;
+            flex: 1; display: flex; justify-content: center; align-items: center; text-transform: uppercase; box-shadow: 0 0 5px var(--dim-green) inset;
+        }
+        button.key.large { flex: 1.5; font-size: clamp(0.7rem, 2.5vw, 0.9rem); }
+        button.key:active { transform: scale(0.95); }
+        button.key.green { background-color: var(--neon-green); color: #000; border-color: var(--neon-green); box-shadow: none; }
+        button.key.yellow { background-color: var(--neon-yellow); color: #000; border-color: var(--neon-yellow); box-shadow: none; }
+        button.key.black { background-color: var(--dark-gray); color: var(--dim-green); border-color: #333; box-shadow: none; }
+
+        /* Mensagens Flutuantes */
+        #message {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #000;
+            color: var(--neon-green); border: 2px solid var(--neon-green); padding: 15px 20px; font-size: 1.2rem;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; box-shadow: 0 0 15px var(--neon-green);
+            text-align: center; width: 80%; max-width: 300px;
+        }
+        .show-message { opacity: 1 !important; }
+
+        p { font-size: 1.1rem; line-height: 1.5; max-width: 500px; text-align: left; margin-bottom: 10px; }
+        .danger-text { color: var(--danger-red); text-shadow: 0 0 10px var(--danger-red); font-size: 2rem; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="scanline"></div>
+    <div id="glitch-overlay"></div>
+
+    <div class="crt-frame">
+        <div class="frame-top-bar">DIALING PROGRESS...</div>
+        <div class="frame-info-left">
+            MEMORY USAGE:<br>
+            81119 KB In use<br>
+            2019 MB Available<br>
+            100 Mbps - Network Analyzer<br><br>
+            F4> HELP<br>
+            F5> QUIT
+        </div>
+        <div class="frame-info-right">
+            MEMORY: 94000 KB<br>
+            CPU: Orion TX7+<br>
+            TASKS: 322 TOTAL<br>
+            UPTIME: 275 DAYS<br>
+        </div>
+        <div class="frame-bottom-bar">RGB MOCKUP // TEXT & LOGO EFFECT</div>
+    </div>
+
+    <div id="start-screen" class="screen">
+        <h1 class="title">HACK!</h1>
+        <div style="font-size: 1.2rem; margin-top: 10px;">> SYSTEM INFILTRATION<span class="blinker">_</span></div>
+        <button class="btn" onclick="mudarTela('game-screen'); iniciarJogo(); entrarEmTelaCheia();">Iniciar Invasão</button>
+        <button class="btn" onclick="mudarTela('tutorial-screen')">Tutorial</button>
+        <div class="dev-footer">DEV wgrmoreira</div>
+    </div>
+
+    <div id="tutorial-screen" class="screen">
+        <h2>> MANUAL DE INVASÃO</h2>
+        <p>- Decifre a senha em 6 tentativas.</p>
+        <p>- Letra <b>VERDE</b>: Correta e no lugar certo. (Ela será mantida automaticamente).</p>
+        <p>- Letra <b>AMARELA</b>: Correta, mas no lugar errado.</p>
+        <p>- O sistema tem 30 níveis de segurança (palavras de 5, 6 e 7 letras).</p>
+        <p style="color:var(--danger-red); text-shadow:0 0 5px red;">- ERRO É FATAL. Falhar uma palavra resulta em rastreio imediato e Game Over.</p>
+        <button class="btn" onclick="mudarTela('start-screen')">Voltar</button>
+    </div>
+
+    <div id="game-over-screen" class="screen">
+        <h1 class="title danger-text">RASTREADO</h1>
+        <p style="text-align: center;">INTRUSÃO DETECTADA.<br>ACESSO BLOQUEADO.</p>
+        <p style="text-align: center;" id="go-score">SCORE FINAL: 0</p>
+        <button class="btn btn-danger" onclick="mudarTela('start-screen')">Reiniciar Conexão</button>
+    </div>
+
+    <div id="victory-screen" class="screen">
+        <h1 class="title" style="color: #fff; text-shadow: 0 0 20px #fff;">HACKEADO</h1>
+        <p style="text-align: center;">MAINFRAME COMPROMETIDO COM SUCESSO.</p>
+        <p style="text-align: center;" id="win-score">SCORE FINAL: 0</p>
+        <button class="btn" style="color:#fff; border-color:#fff;" onclick="mudarTela('start-screen')">Sair do Sistema</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="hud">
+            <div class="hud-row">
+                <div>LEVEL: <span id="word-counter">1/30</span></div>
+                <div>SCORE: <span id="score-display">0000</span></div>
+            </div>
+            <div id="status-text">> FIREWALL: ACTIVE</div>
+            <div id="progress-bar">[                    ] 0%</div>
+        </div>
+
+        <div id="board"></div>
+
+        <div id="keyboard">
+            <div class="key-row">
+                <button class="key" data-key="Q">Q</button>
+                <button class="key" data-key="W">W</button>
+                <button class="key" data-key="E">E</button>
+                <button class="key" data-key="R">R</button>
+                <button class="key" data-key="T">T</button>
+                <button class="key" data-key="Y">Y</button>
+                <button class="key" data-key="U">U</button>
+                <button class="key" data-key="I">I</button>
+                <button class="key" data-key="O">O</button>
+                <button class="key" data-key="P">P</button>
+            </div>
+            <div class="key-row">
+                <button class="key" data-key="A">A</button>
+                <button class="key" data-key="S">S</button>
+                <button class="key" data-key="D">D</button>
+                <button class="key" data-key="F">F</button>
+                <button class="key" data-key="G">G</button>
+                <button class="key" data-key="H">H</button>
+                <button class="key" data-key="J">J</button>
+                <button class="key" data-key="K">K</button>
+                <button class="key" data-key="L">L</button>
+                <button class="key large" data-key="Backspace">DEL</button>
+            </div>
+            <div class="key-row">
+                <button class="key" data-key="Z">Z</button>
+                <button class="key" data-key="X">X</button>
+                <button class="key" data-key="C">C</button>
+                <button class="key" data-key="V">V</button>
+                <button class="key" data-key="B">B</button>
+                <button class="key" data-key="N">N</button>
+                <button class="key" data-key="M">M</button>
+                <button class="key large" data-key="Enter">EXE</button>
+            </div>
+        </div>
+        
+        <div class="mobile-stats">
+            MEM: 81119 KB IN USE / 2019 MB AVAIL | NET: 100 Mbps<br>
+            CPU: ORION TX7+ | UPTIME: 275 DAYS
+        </div>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        // Função para ativar Tela Cheia no celular/PC
+        function entrarEmTelaCheia() {
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log("Fullscreen negado"));
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // GERADOR DE GLITCH RANDOMICO (FREQUÊNCIA DIMINUÍDA)
+        const glitchChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*!<>{}[]/\\";
+        const glitchOverlay = document.getElementById('glitch-overlay');
+
+        function triggerGlitch() {
+            const span = document.createElement('span');
+            span.className = 'glitch-char';
+            span.textContent = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+            
+            span.style.left = Math.random() * 95 + 'vw';
+            span.style.top = Math.random() * 95 + 'vh';
+            span.style.fontSize = (Math.random() * 3 + 1) + 'rem';
+            
+            glitchOverlay.appendChild(span);
+            setTimeout(() => span.remove(), 150);
+            
+            // Frequência ajustada para ocorrer entre 1.5 e 4.5 segundos
+            setTimeout(triggerGlitch, Math.random() * 3000 + 1500);
+        }
+        
+        triggerGlitch();
+
+        // Bancos de Palavras (100 de cada)
+        const palavras5 = "AREIA,ADEGA,TERMO,CASPA,LETRA,VERDE,FICAR,PRETO,PORTA,SAGAZ,AMAGO,NEGRO,MEXER,TERRA,VIDRO,CARRO,JUSTO,TEMPO,LUGAR,MUITO,SABER,FAZER,PODER,MUNDO,NOSSO,VIVER,TARDE,NOITE,CLARO,LINDO,FORTE,MANHA,FILHO,LIVRO,FALAR,BEIJO,FELIZ,VETOR,FUNDO,POUCO,COISA,MESMO,ASSIM,AGORA,AINDA,ESTAR,ENTRE,QUASE,COMO,NUNCA,SOBRE,TAMPO,ROSTO,PONTO,PARTE,MENOR,MAIOR,MELAO,FRUTO,PLANO,PRATO,PRECO,PONTE,FESTA,FONTE,CARTA,CANTO,CHAVE,CLUBE,CLIMA,CORPO,CORTE,CUSTO,DENTE,DIZER,DURAR,EIXOS,ERROS,EXAME,FALSO,FINAL,FOGOS,FOLHA,FORMA,FRACO,GANHO,GASTO,GENTE,GOSTO,GRITO,GRUPO,IDOSA,IGUAL,ILHAS,IMPAR,INDIO,IRMAO,JOGOS,LADOS,LINHA,LOCAL".split(",");
+        const palavras6 = "HACKER,CODIGO,MATRIZ,FUTURO,ACESSO,TECLAS,PAINEL,SENHAS,SISTEM,PENSAR,PESSOA,ESTADO,SEGUIR,SEGUND,PASSAR,FRENTE,GRANDE,POUCOS,DENTRO,QUERER,DEPOIS,MUITOS,OUTROS,PRONTO,SEMPRE,QUATRO,CONTRA,MANTER,ABERTO,FORMAS,PONTOS,LETRAS,NUMERO,ESPACO,TENTAR,ACHADO,MANDAR,EFEITO,MAXIMO,MINIMO,NENHUM,NORMAL,OITAVO,ORIGEM,PADRAO,PAISES,PAPEIS,PARTES,PASSOS,PAUSAS,PEDIDO,PERDAS,PERFIL,PERIGO,PERNAS,PLANOS,POBRES,PONTAS,PORTAS,POSTOS,PRAZOS,PRECOS,PREDIO,PRIMOS,PROVAS,QUEDAS,RACAOS,RAZOES,REGRAS,RESTOS,ROTINA,ROUPAS,SABIDO,SAIDAS,SANGUE,SANTOS,SESSAO,SECULO,SEGURO,SINAIS,SOBRES,SOCIOS,SONHOS,SURGIR,TERMOS,TESTES,TEXTOS,TORTOS,TOTAIS,TRAMAS,TROCAS,TUMULO,VAGAS,VALORES,VENDAS,VENTOS,VERBOS,VINDAS,VISTOS,VOLTAS".split(",");
+        const palavras7 = "SISTEMA,ARQUIVO,INVASAO,INTRUSO,TECLADO,MONITOR,MAQUINA,HACKEAR,CONEXAO,ENERGIA,CELULAR,USUARIO,SENSORES,BATERIA,PROGRAM,COMANDO,CODIGOS,DIGITAL,VIRTUAL,CADEADO,LIGACAO,NUMEROS,ALFABET,FIREWAL,MODELOS,OBJETOS,FUNCOES,CALCULO,MEMORIA,ROTINAS,VALORES,INICIAL,TERMINA,PACOTES,SINAIS,PAGINAS,SERVIDO,HOSPEDA,DOMINIO,DIRECAO,ARQUIVA,INSERIR,REMOVER,ALTERAR,APLICAR,TROCADO,LIMPADO,CRIACAO,SECRETA,PRIVADO,PUBLICO,EXTERNO,INTERNO,FALHADO,SUCESSO,AVISADO,RECURSO,RESERVA,SUPORTE,SISTEMS,GRAFICO,DESENHO,IMAGENS,AUDITOS,ANALISE,RESUMOS,RETORNO,ENTRADA,SAIDAS,LIGADOS,PARADOS,QUEBRAS,ROTACAO,VELOZES,MAXIMOS,MINIMOS,MAIORES,MENORES,COMPRAS,VENDIDO,FATURAS,TRIBUTO,IMPOSTO,RECEITA,DESPESA,CAPITAL,LIQUIDO,MERCADO,CLIENTE,PRODUTO,SERVICO,ENTREGA,PEDIDOS,USUARIA,TECNICO,SUPORTE,REDEWEB,CAMADAS,CRIPTOS".split(",");
+
+        let rotinaPalavras = [];
+        let palavraAlvo = "";
+        let palavraIndex = 0;
+        let scoreTotal = 0;
+        let tempoInicioWord = 0;
+        let wordLength = 5;
+        let linhaAtual = 0;
+        let isProcessing = false;
+        let letrasVerdesBloqueadas = [];
+
+        const board = document.getElementById("board");
+        const msgBox = document.getElementById("message");
+
+        // Sistema de Áudio Global
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function tocarSom(frequencia, tipo, duracao, volume = 0.1) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = tipo;
+            osc.frequency.setValueAtTime(frequencia, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracao);
+            osc.stop(audioCtx.currentTime + duracao);
+        }
+
+        const sons = {
+            clickGeral: () => tocarSom(1000, 'sine', 0.05, 0.02),
+            digitar: () => tocarSom(800, 'square', 0.05, 0.05),
+            apagar: () => tocarSom(300, 'sawtooth', 0.1, 0.05),
+            enter: () => tocarSom(1200, 'square', 0.1, 0.1),
+            erro: () => tocarSom(150, 'sawtooth', 0.3, 0.2),
+            sucessoLetra: () => tocarSom(2000, 'sine', 0.1, 0.1),
+            vitoriaPalavra: () => {
+                setTimeout(() => tocarSom(800, 'square', 0.1), 0);
+                setTimeout(() => tocarSom(1200, 'square', 0.1), 150);
+                setTimeout(() => tocarSom(1600, 'square', 0.3), 300);
+            },
+            falhaCritica: () => {
+                tocarSom(150, 'sawtooth', 0.8, 0.3);
+                setTimeout(() => tocarSom(100, 'sawtooth', 1.0, 0.3), 300);
+            }
+        };
+
+        document.addEventListener('pointerdown', (e) => {
+            initAudio();
+            if (!e.target.classList.contains('key') && !e.target.classList.contains('btn')) sons.clickGeral();
+        });
+
+        function mudarTela(idTela) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(idTela).style.display = 'flex';
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function iniciarJogo() {
+            let mix5 = shuffle([...palavras5]).slice(0, 10);
+            let mix6 = shuffle([...palavras6]).slice(0, 10);
+            let mix7 = shuffle([...palavras7]).slice(0, 10);
+            rotinaPalavras = mix5.concat(mix6).concat(mix7);
+            
+            palavraIndex = 0;
+            scoreTotal = 0;
+            document.getElementById("score-display").textContent = "0000";
+            
+            carregarProximaPalavra();
+        }
+
+        function atualizarEvolucao() {
+            let pct = Math.floor((palavraIndex / 30) * 100);
+            let barsCount = Math.floor((palavraIndex / 30) * 20);
+            let barString = "[" + "█".repeat(barsCount) + "▒".repeat(20 - barsCount) + `] ${pct}%`;
+            
+            document.getElementById("progress-bar").textContent = barString;
+
+            let statusTxt = document.getElementById("status-text");
+            if (palavraIndex < 10) {
+                statusTxt.textContent = "> FIREWALL: ACTIVE";
+                statusTxt.style.color = "var(--neon-green)";
+            } else if (palavraIndex < 20) {
+                statusTxt.textContent = "> FIREWALL: BYPASSING...";
+                statusTxt.style.color = "var(--neon-yellow)";
+            } else {
+                statusTxt.textContent = "> MAINFRAME: DECRYPTING...";
+                statusTxt.style.color = "var(--danger-red)";
+            }
+        }
+
+        function carregarProximaPalavra() {
+            if (palavraIndex >= 30) {
+                document.getElementById("win-score").textContent = "SCORE FINAL: " + scoreTotal;
+                mudarTela('victory-screen');
+                return;
+            }
+
+            atualizarEvolucao();
+            palavraAlvo = rotinaPalavras[palavraIndex];
+            wordLength = palavraAlvo.length;
+            linhaAtual = 0;
+            isProcessing = false;
+            letrasVerdesBloqueadas = Array(wordLength).fill("");
+            tempoInicioWord = Date.now();
+
+            document.getElementById("word-counter").textContent = `${palavraIndex + 1}/30`;
+            
+            limparTeclado();
+            construirTabuleiro();
+        }
+
+        function construirTabuleiro() {
+            board.innerHTML = "";
+            for (let r = 0; r < 6; r++) {
+                let divRow = document.createElement("div");
+                divRow.className = "row";
+                divRow.id = `row-${r}`;
+                for (let c = 0; c < wordLength; c++) {
+                    let divTile = document.createElement("div");
+                    divTile.className = "tile";
+                    divRow.appendChild(divTile);
+                }
+                board.appendChild(divRow);
+            }
+            preencherLetrasBloqueadas();
+        }
+
+        function limparTeclado() {
+            document.querySelectorAll(".key").forEach(btn => {
+                btn.classList.remove("green", "yellow", "black");
+            });
+        }
+
+        function mostrarMensagem(texto, duracao = 2000) {
+            msgBox.textContent = texto;
+            msgBox.classList.add("show-message");
+            setTimeout(() => msgBox.classList.remove("show-message"), duracao);
+        }
+
+        function adicionarLetra(letra) {
+            if (isProcessing) return;
+            let linha = document.getElementById(`row-${linhaAtual}`).children;
+            for (let i = 0; i < wordLength; i++) {
+                if (linha[i].textContent === "") {
+                    linha[i].textContent = letra;
+                    linha[i].classList.add("filled");
+                    sons.digitar();
+                    break;
+                }
+            }
+        }
+
+        function apagarLetra() {
+            if (isProcessing) return;
+            let linha = document.getElementById(`row-${linhaAtual}`).children;
+            for (let i = wordLength - 1; i >= 0; i--) {
+                if (linha[i].textContent !== "" && !linha[i].classList.contains("bloqueada")) {
+                    linha[i].textContent = "";
+                    linha[i].classList.remove("filled");
+                    sons.apagar();
+                    break;
+                }
+            }
+        }
+
+        function processarTentativa() {
+            if (isProcessing) return;
+            let linha = document.getElementById(`row-${linhaAtual}`).children;
+            let chute = "";
+            
+            for (let i = 0; i < wordLength; i++) { chute += linha[i].textContent; }
+
+            if (chute.length !== wordLength) {
+                sons.erro();
+                mostrarMensagem("INCOMPLETE DATA");
+                return;
+            }
+
+            sons.enter();
+            isProcessing = true;
+            verificarPalavra(chute, linha);
+        }
+
+        function verificarPalavra(chute, elementosLinha) {
+            let alvoArr = palavraAlvo.split("");
+            let chuteArr = chute.split("");
+            let cores = Array(wordLength).fill("black");
+
+            for (let i = 0; i < wordLength; i++) {
+                if (chuteArr[i] === alvoArr[i]) {
+                    cores[i] = "green";
+                    alvoArr[i] = null;
+                    letrasVerdesBloqueadas[i] = chuteArr[i];
+                }
+            }
+
+            for (let i = 0; i < wordLength; i++) {
+                if (cores[i] === "green") continue;
+                let indice = alvoArr.indexOf(chuteArr[i]);
+                if (indice !== -1) {
+                    cores[i] = "yellow";
+                    alvoArr[indice] = null;
+                }
+            }
+
+            for (let i = 0; i < wordLength; i++) {
+                setTimeout(() => {
+                    elementosLinha[i].classList.add("flip");
+                    sons.sucessoLetra();
+                    setTimeout(() => {
+                        elementosLinha[i].classList.add(cores[i]);
+                        elementosLinha[i].classList.remove("filled");
+                        atualizarCorTeclado(chuteArr[i], cores[i]);
+                    }, 300);
+                }, i * 300);
+            }
+
+            setTimeout(() => {
+                if (chute === palavraAlvo) {
+                    sons.vitoriaPalavra();
+                    calcularPontuacao();
+                    mostrarMensagem("> DECRYPT SUCESSO", 2000);
+                    setTimeout(() => {
+                        palavraIndex++;
+                        carregarProximaPalavra();
+                    }, 2500);
+                    return;
+                }
+
+                linhaAtual++;
+                
+                if (linhaAtual === 6) {
+                    sons.falhaCritica();
+                    mostrarMensagem("ACESSO NEGADO", 3000);
+                    setTimeout(() => {
+                        document.getElementById("go-score").textContent = "SCORE FINAL: " + scoreTotal;
+                        mudarTela('game-over-screen');
+                        if(document.fullscreenElement) document.exitFullscreen(); // Sai do full screen ao perder
+                    }, 2000);
+                    return;
+                }
+
+                preencherLetrasBloqueadas();
+                isProcessing = false;
+
+            }, wordLength * 300 + 400);
+        }
+
+        function calcularPontuacao() {
+            let tempoGasto = (Date.now() - tempoInicioWord) / 1000;
+            let pontosBase = wordLength * 200;
+            let pontosDestaPalavra = Math.max(50, Math.floor(pontosBase - (tempoGasto * 15)));
+            scoreTotal += pontosDestaPalavra;
+            document.getElementById("score-display").textContent = scoreTotal.toString().padStart(4, '0');
+        }
+
+        function preencherLetrasBloqueadas() {
+            if (linhaAtual >= 6) return;
+            let novaLinha = document.getElementById(`row-${linhaAtual}`).children;
+            for (let i = 0; i < wordLength; i++) {
+                if (letrasVerdesBloqueadas[i] !== "") {
+                    novaLinha[i].textContent = letrasVerdesBloqueadas[i];
+                    novaLinha[i].classList.add("green", "bloqueada");
+                }
+            }
+        }
+
+        function atualizarCorTeclado(letra, cor) {
+            let botao = document.querySelector(`.key[data-key="${letra}"]`);
+            if (!botao) return;
+            if (botao.classList.contains("green")) return; 
+            if (botao.classList.contains("yellow") && cor === "black") return;
+            botao.classList.remove("yellow", "black");
+            botao.classList.add(cor);
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (document.getElementById("game-screen").style.display !== "flex") return;
+            if (e.key === "Enter") processarTentativa();
+            else if (e.key === "Backspace") apagarLetra();
+            else if (/^[A-Za-z]$/.test(e.key)) adicionarLetra(e.key.toUpperCase());
+        });
+
+        document.querySelectorAll(".key").forEach(botao => {
+            botao.addEventListener("click", () => {
+                let tecla = botao.getAttribute("data-key");
+                if (tecla === "Enter") processarTentativa();
+                else if (tecla === "Backspace") apagarLetra();
+                else adicionarLetra(tecla);
+            });
+        });
+    </script>
+</body>
+</html>
